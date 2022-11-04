@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+        <style>
+            .row{
+                width: 216px;
+                height: 215px;
+                border: 1px solid gainsboro;
+                position: relative;
+                left: 40%;
+                text-align: center;
+            }
+            .clearfix {
+                content: " ";
+                display: block;
+                clear: both;
+            }
+            .cell {
+                width: 20px;
+                height: 20px;
+                background: #9e9e9e;
+                border: 2px solid gainsboro;
+                float: left;
+            }
+            .hide {
+                /*line-height:0;*/
+                font-size:0;
+                /*overflow:hidden;*/
+
+            }
+            .pattern {
+                /*display: flex;*/
+                float: left;
+                left: 40%;
+                position: relative;
+                width: 216px;
+            }
+            .start:hover{
+                cursor:pointer;
+            }
+            .flag {
+                background-image: url("flag.jpeg");
+                content: '🚩';
+
+            }
+            .start {
+                flex: 1 1 auto;
+                margin: 5px;
+                padding: 5px;
+                border: 1px solid white;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+                transition: 0.3s;
+                top: 0;
+            }
+            .sta:after {
+                position: absolute;
+                transition: 0.3s;
+                content: "";
+                width: 0;
+                left: 50%;
+                bottom: 0;
+                height: 3px;
+                background: #9e9e9e;
+            }
+            .sta:hover {
+                cursor: pointer;
+            }
+            .sta:hover:after {
+                width: 100%;
+                left: 0;
+            }
+            .time {
+                position: absolute;
+                display: inline;
+                border: 1px solid white;
+                text-align: center;
+                transition: 0.3s;
+                /*flex: auto;*/
+                margin: 5px;
+                padding: 5px;
+                left: 65%;
+                bottom: 0;
+            }
+            .Time {
+                position: absolute;
+                left: 89%;
+                top: 24%;
+            }
+            .colour {
+                background: white;
+            }
+            .text-colour {
+                color: #1198ff;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="pattern">
+            <button class="sta start">重新开始</button>
+            <button class="sta time" data-id="0" data-nubmer="0">计时: </button>
+            <div class="Time"></div>
+            <br>
+        </div>
+        <div class="row clearfix">
+        </div>
+        <script>
+            // 1. templateCell 函数, 参数为数组 line 和变量 x
+            // line 是每一行的数组
+            // 比如第一行就是 | 9 | 1 | 0 | 0 | 0 | 1 | 1 | 1 | 0 |
+            // x 表示第几行
+            // 这个函数返回 line.length 个 cell 拼接的字符串
+            let math = 0
+            const log = console.log.bind(console)
+            // let s = '[[9,1,0,0,0,1,1,1,0],[1,1,0,0,1,2,9,1,0],[1,1,1,0,1,9,2,1,0],[1,9,2,1,1,1,1,0,0],[1,2,9,1,0,0,1,1,1],[1,2,1,1,0,1,2,9,1],[9,1,0,0,1,2,9,2,1],[1,2,1,1,1,9,2,1,0],[0,1,9,1,1,1,1,0,0]]'
+            let s = '[[9,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,9,0,0],[0,0,0,0,0,9,0,0,0],[0,9,0,0,0,0,0,0,0],[0,0,9,0,0,0,0,0,0],[0,0,0,0,0,0,0,9,0],[9,0,0,0,0,0,9,0,0],[0,0,0,0,0,9,0,0,0],[0,0,9,0,0,0,0,0,0]]'
+            let square = JSON.parse(s)
+
+            const e = function(selector) {
+                let element = document.querySelector(selector)
+                if (element === null) {
+                    let s = `选择器 ${selector} 写错了, 请仔细检查并且复习三种基本的选择器`
+                    alert(s)
+                    return null
+                } else {
+                    return element
+                }
+            }
+
+            const es = function(selector) {
+                let elements = document.querySelectorAll(selector)
+                if (elements.length === 0) {
+                    let s = `选择器 ${selector} 写错了, 请仔细检查并且复习三种基本的选择器`
+                    alert(s)
+                    return []
+                } else {
+                    return elements
+                }
+            }
+
+            const insert = (s) => {
+                let time = e('.Time')
+                let t = `
+                <span>${s}</span>
+                `
+                time.innerHTML = t
+            }
+
+            const demoTime = () => {
+                let time = e('.time')
+                let id = parseInt(time.dataset.nubmer)
+                // log("id", id)
+                let clockId = setInterval(function() {
+                    s = id + 1
+                    // log("开始", s)
+                    insert(s)
+                    id = s
+                }, 1000)
+                time.dataset.id = String(clockId)
+                return clockId
+            }
+
+            const shut_ = () => {
+                let time = e('.time')
+                let id = time.dataset.id
+                parseInt(id, 10)
+                window.addEventListener('onbeforeunload', function() {
+                    clearInterval(id)
+                })
+                time.addEventListener('click', function(event) {
+                    // let self = event.target
+                    log("点击到", id)
+                    clearInterval(id)
+                })
+            }
+
+            const star = function() {
+                let st = e(".start")
+                st.addEventListener('click', function(event) {
+                    location.reload()
+                })
+            }
+
+            const shuffle = function(array) {
+                let random = 0
+                let newarr = []
+                while (array.length) {
+                    random = Math.floor(Math.random() * array.length)
+                    newarr.push(array[random])
+                    array.splice(random, 1)
+                }
+                // log("return", newarr)
+                return newarr
+            }
+
+            //处理随机数以后的数字
+            const push_1 = function (square, i, j) {
+                let n = square.length
+                // array[x][y] 不能是 9
+                // 下标不能越界
+                if (i >= 0 && i < n && j >= 0 && j < n) {
+                    if (square[i][j] !== 9) {
+                        square[i][j] += 1
+                    }
+                }
+            }
+
+            const markAround = function (square, i, j) {
+                //标记周围8个点
+                if (square[i][j] === 9) {
+                    //zuo
+                    push_1(square, i - 1,j - 1)
+                    push_1(square, i - 1, j)
+                    push_1(square, i - 1,j + 1)
+                    //中2个
+                    push_1(square, i,j - 1)
+                    push_1(square, i,j + 1)
+                    //
+                    push_1(square, i + 1,j - 1)
+                    push_1(square, i + 1,j)
+                    push_1(square, i + 1,j + 1)
+                }
+            }
+
+            const clonedSquare = function(array) {
+                let new_array = []
+                for (let i = 0; i < array.length; i++) {
+                    new_array.push(array[i].slice(0))
+                }
+                return new_array
+            }
+
+            const markedSquare = function(array) {
+                let square = clonedSquare(array)
+                for (let i = 0; i < square.length; i++) {
+                    let line = square[i]
+                    for (let j = 0; j < line.length; j++) {
+                        markAround(square, i, j)
+                    }
+                }
+                return square
+            }
+
+            const removeAll = function(active) {
+                let s = '.' + active
+                let array = es(s)
+                for (let i = 0; i < array.length; i++) {
+                    array[i].classList.remove(active)
+                    array[i].classList.add('colour')
+                }
+            }
+
+            const removeflag = function(active) {
+                let s = '.' + active
+                let array = es(s)
+                for (let i = 0; i < array.length; i++) {
+                    array[i].classList.remove(active)
+                }
+            }
+
+            const templateCell = function(line, x) {
+                let result = ''
+                for (let i = 0; i < line.length; i++) {
+                    result += `<div class="cell hide" data-number=${line[i]} data-x=${x} data-y=${i}>${line[i]}</div>`
+                }
+                return result
+            }
+
+            // 2. templateRow 的参数 square 是二维数组
+            // 用来表示雷相关的数据, 我们这里是直接写死的数据
+            // 返回 square.length 个 row 拼接的字符串
+            // row 的内容由 templateCell 函数生成
+            const templateRow = function(square) {
+                let result = ''
+                for (let i = 0; i < square.length; i++) {
+                    result += templateCell(square[i], i)
+                }
+                return result
+            }
+
+            // 3. square 是二维数组, 用来表示雷相关的数据
+            // 用 square 生成 9 * 9 的格子, 然后插入到页面中
+            // div container 是 <div id="id-div-mime"></div>
+            const renderSquare = function(square) {
+                let row = e(".row.clearfix")
+                row.insertAdjacentHTML('beforeend', templateRow(square))
+            }
+
+            // 4. 实现 bindEventDelegate 函数
+            // 用事件委托的形式在父元素上面绑定 click 事件, 只处理格子
+            // 也就是 .cell(即 class 包含 cell 字符串) 元素
+            // 如果点击的是 .cell 元素, 那么调用 vjkl 函数
+            // 注意, 我们在 bindEventDelegate 里面不处理具体的逻辑, 只调用函数
+            // 具体逻辑放在 vjkl 函数里面实现
+            const bindEventDelegate = function(square) {
+                let rows = es(".cell")
+                for (let i = 0; i < rows.length; i++) {
+                    rows[i].remove()
+                }
+            }
+
+            // 5. vjkl 是点击格子后执行的函数, 我们需要把扫雷的逻辑写在这个函数中
+            // 要注意的是我们在初始情况下就把数字写到了 html 中
+            // <div class="cell" data-number="1" data-x="0" data-y="1">1</div>
+            // 而初始情况下数字不应该显示出来的, 可以直接用 font-size: 0; 来隐藏文字
+            // 点击的时候根据情况用 font-size: 14px; 的方式显示文字
+            // 当然这一步应该用 class 来完成, 比如 opened class 里面写 font-size: 14px;
+            // 点击的时候根据 class 来执行具体逻辑
+            // 如果已经显示过(也就是 class 包含 opened), 则不做任何处理
+            // 如果没有显示过(也就是 class 不包含 opened), 判断下列情况
+            // 1. 假设点击的是数字 9, 展开, 游戏结束
+            // 2. 假设点击的是数字 0
+            // 此时需要展开 0 周围的一片, 通过调用 vjklAround 函数来完成
+            // 也就是说依然把逻辑写在下一层函数 vjklAround 中
+            // 3. 假设点击的是其他数字, 展开
+            const vjkl = function(cell, square) {
+                let row = e(".row.clearfix")
+                let number = 0
+                let stochastic = shuffle(square)
+                let st = markedSquare(stochastic)
+                if (cell !== null) {
+                    let seek = e(`[data-x="${cell[0]}"][data-y="${cell[1]}"]`)
+                    if (seek.dataset.number === '0') {
+                        seek.classList.remove('hide')
+                        seek.classList.add('colour')
+                        seek.classList.remove('flag')
+                        math += 1
+                        vjklAround(stochastic, cell[0], cell[1])
+                    } else if (seek.dataset.number === '9'){
+                        // log("第二次点击到9",)
+                        bindEventDelegate(stochastic)
+                        renderSquare(st)
+                        let b = cell[0] + cell[1]
+                        return vjkl(b, stochastic)
+                    } else {
+                        log("else1")
+                        seek.classList.remove("hide")
+                        seek.classList.add('colour')
+                        // seek.classList.remove('flag')
+                        math += 1
+                    }
+                }
+
+                row.addEventListener('click', function(event) {
+                    let self = event.target
+                    let value = self.dataset.number
+                    let x = self.dataset.x
+                    let y = self.dataset.y
+                    number += 1
+
+                    if (!self.classList.contains("hide")) {
+                        // log("展开过了")
+                    } else {
+                        if (number === 1) {
+                            if (value === '9') {
+                                // log("第一次点击到9",)
+                                bindEventDelegate(square)
+                                renderSquare(st)
+                                let b = [x] + [y]
+                                return vjkl(b, stochastic)
+                            }
+                        }
+                        if (value === '9') {
+                            mine_()
+                            removeAll("hide")
+                            if (row.querySelector(".flag")) {
+                                removeflag("flag")
+                            }
+
+                        } else if (value === '0') {
+                            // self.classList.remove('hide')
+                            // log("else if 0", )
+                            vjklAround(stochastic, x, y)
+
+                        } else {
+                            // log('else')
+                            self.classList.remove('hide')
+                            self.classList.add('colour')
+                            self.classList.remove('flag')
+                            math += 1
+                        }
+                    }
+                    log('math', math)
+                    if (math === 71) {
+                        alert('恭喜成功通关，截图领取一瓶冷饮！')
+                    }
+                })
+            }
+
+            const replace = () => {
+                let row = es(".cell")
+                for (let i = 0; i < row.length; i++) {
+                    let number = row[i].dataset.number
+                    if (number === '0') {
+                        row[i].innerHTML = ' '
+                    } else if (number === '9') {
+                        row[i].innerHTML = '💣'
+                    } else {
+                        row[i].classList.add('.text-colour')
+                    }
+                }
+            }
+
+            // 6. vjklAround 展开周围 cell 周围 8 个元素,
+            // x 和 y 分别是下标
+            // 展开周围的元素通过调用 vjkl1 来解决
+            // 注意, 依然把逻辑放在下一层来处理
+            const vjklAround = function(square, x, y) {
+                x = parseInt(x, 10)
+                y = parseInt(y, 10)
+
+                vjkl1(square, x - 1, y - 1)
+                vjkl1(square, x - 1, y)
+                vjkl1(square, x - 1, y + 1)
+                //中间两个
+                vjkl1(square, x, y - 1)
+                vjkl1(square, x, y)
+                vjkl1(square, x, y + 1)
+                //下面三个
+                vjkl1(square, x + 1, y - 1)
+                vjkl1(square, x + 1, y)
+                vjkl1(square, x + 1, y + 1)
+            }
+
+            // 7. vjkl1 是重点函数
+            // 如果满足边界调节, 则继续
+            // 满足边界的意思是下标符合范围
+            // 因为 vjkl1 这个函数的作用是展开格子, 所以如果已经展开过, 那么就不展开元素
+            // 根据 x 和 y 还有属性选择器选择出格子, 具体可以参考
+            // https://developer.mozilla.org/zh-CN/docs/Web/CSS/Attribute_selectors
+            // 比如想选中 data-x=3 的元素, 语法是 e('[data-x="3"]')
+            // 比如想同时选中 data-x=3 且 data-y=5 的元素, 语法是 e('[data-x="3"][data-y="5"]')
+            // 选择元素之后根据情况来判断
+            // 如果没有展开过, 继续判断下列情况
+            // 如果碰到的是 0, 展开, 并且递归调用 vjklAround 函数
+            // 如果碰到的是其他元素, 展开
+            const vjkl1 = function(square, x, y) {
+                // let x1 = 'data-x' + '=' + `"${x}"`
+                // let y1 = 'data-y' + '=' + `"${y}"`
+                // let z = e(`[${x1}][${y1}]`)
+                let s = square.length
+                if (x >= 0 && x < s && y >= 0 && y < s) {
+                    let z = e(`[data-x="${x}"][data-y="${y}"]`)
+                    if (z.classList.contains("hide")) {
+                        math += 1
+                        if (z.dataset.number === '0') {
+                            z.classList.remove("hide")
+                            replace()
+                            z.classList.add('colour')
+                            z.classList.remove("flag")
+                            vjklAround(square, x, y)
+                        } else {
+                            z.classList.remove("hide")
+                            z.classList.remove("flag")
+                            z.classList.add('colour')
+                        }
+                    }
+                }
+            }
+
+            const mouse = function() {
+                let whole = e('.row.clearfix')
+                whole.addEventListener('contextmenu', function(event) {
+                    event.preventDefault()
+                    let self = event.target
+                    if (self.classList.contains('hide')) {
+                        self.classList.toggle('flag')
+                    }
+                })
+
+                whole.addEventListener('click', function(Event) {
+                    let self = Event.target
+                    if (self.classList.contains('flag')) {
+                        Event.stopPropagation()
+                    }
+                }, true)
+            }
+
+            const mine_ = function() {
+                let row = e(".row.clearfix")
+                let vs = row.querySelectorAll('.hide')
+                for (let i = 0; i < vs.length; i++) {
+                    if (vs[i].dataset.number === '9') {
+                        vs[i].classList.add('mine')
+                        replace()
+                    }
+                }
+            }
+
+            const _main = function() {
+                let stochastic = shuffle(square)
+                let st = markedSquare(stochastic)
+                renderSquare(st)
+                vjkl(null, stochastic)
+                star()
+                mouse()
+                demoTime()
+                shut_()
+                // replace()
+            }
+            _main()
+        </script>
+    </body>
+</html>
